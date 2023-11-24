@@ -20,7 +20,7 @@ typedef struct {
 } Player;
 
 typedef struct {
-	int ownerId;
+	Player *owner;
 	int id;
 	bool isHome;
 	bool isOnBar;
@@ -30,23 +30,28 @@ typedef struct {
 
 typedef struct {
 	int pawnsInside;
-	int pawnsId[PAWNS_PER_POINT];
+	Pawn *pawns[PAWNS_PER_POINT];
 } Point;
 
 typedef struct {
 	int pawnsInside;
-	int pawnsId[totalPawns];
+	Pawn *pawns[totalPawns];
 } Bar;
 
 typedef struct {
 	int pawnsInside;
-	int pawnsId[PAWNS_PER_PLAYER];
-	int ownerId;
+	Pawn *pawns[PAWNS_PER_PLAYER];
+	Player *owner;
 } Court;
 
 typedef struct {
-	Pawn pawns[totalPawns];
+	Pawn pawns[PAWNS_PER_PLAYER];
+	Player *owner;
+} PlayerPawns;
+
+typedef struct {
 	Player players[N_PLAYERS];
+	PlayerPawns pawnGroups[N_PLAYERS];
 	int currentPlayerId;
 	Point points[nPoints];
 	Court courts[N_PLAYERS];
