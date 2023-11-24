@@ -5,4 +5,6 @@ set(CMAKE_CXX_STANDARD 20)
 
 add_executable(StructToBase64 main.cpp
         structs.h
-        config.h)
+        config.h
+        base64.cpp
+        base64.h)
