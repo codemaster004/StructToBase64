@@ -222,7 +222,7 @@ Board deserializeBoard(const uint8_t *buffer, size_t &offset) {
 	return board;
 }
 
-int main_() {
+int main() {
 	Board game = initEverything();
 	auto *primeTable = new uint8_t[2000];
 	size_t index = 0;

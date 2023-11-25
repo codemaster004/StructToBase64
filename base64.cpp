@@ -36,6 +36,11 @@ int finalEncodedDataLen(int len) {
 	return count;
 }
 
+int finalDecodedDataLen(int len) {
+	int count = len / 4 * 3;
+	return count;
+}
+
 int toNumber(const uint8_t *byteBlock, int blockSize = 3) {
 	int res = 0;
 	for (int i = 0; i < blockSize; ++i) {
@@ -64,51 +69,62 @@ char *encodeBase64(uint8_t *data, size_t length) {
 	int finalLen = finalEncodedDataLen((int) (length));
 	char *finalData = new char[finalLen];
 
-	int encodedChar = 0;
+	int encodedCount = 0;
 	for (int i = 0; i < length; i += 3) {
 		int padding = 0;
 		if (i + 3 > length) {
 			padding = (i + 3) - (int) (length);
 		}
 		int block = toNumber(data + i, 3 - padding);
-		toBase64(block, finalData, encodedChar, padding);
+		toBase64(block, finalData, encodedCount, padding);
 	}
 
 	return finalData;
 }
 
-//uint8_t * decodeBase64(const char *base64String, int length) {
-//	int paddingCount = 0;
-//	int encodedNumber = 0;
-//	for (int i = 0; i < 4; ++i) {
-//		char tempChar = base64String[i];
-//		if (tempChar == '=') {
-//			encodedNumber <<= 6;
-//			paddingCount++;
-//		} else {
-//			encodedNumber <<= 6;
-//			encodedNumber += indexOf(base64table, tempChar, baseSize);
-//		}
-//
-//		if (i == 3) {
-//			vector<char> decodedBytes;
-//			for (int j = 0; j < 3 - paddingCount; ++j) {
-//				int mask = createBitMask(8, 8 * (2 - j));
-//				int decodedNumber = (encodedNumber & mask) >> 8 * (2 - j);
-//
-//				decodedBytes.push_back((char) (decodedNumber));
-//			}
-//			return decodedBytes;
-//		}
-//	}
-//	return {};
-//}
+int fromBase64(const char *base, int &padding) {
+	int block = 0;
+	for (int i = 0; i < 4; ++i) {
+		if (base[i] == '=') {
+			block <<= 6;
+			padding++;
+		} else {
+			block <<= 6;
+			block += indexOf(base64table, base[i], baseSize);
+		}
+	}
+	return block;
+}
 
-int main() {
-	const int len = 4;
-	uint8_t test[len] = {'h', 'e', 'l', 'l'};
-	char *res = encodeBase64(test, len);
-	std::cout << res;
+void toChar(uint8_t *data, int &offset, int block, int padding) {
+	for (int j = 0; j < 3 - padding; ++j) {
+		int mask = createBitMask(8, 8 * (2 - j));
+		data[offset++] = (block & mask) >> 8 * (2 - j);
+	}
+}
+
+uint8_t *decodeBase64(const char *base64String, size_t length) {
+	int expectedLength = finalDecodedDataLen((int) (length));
+	auto *decodedData = new uint8_t[expectedLength];
+	int decodedCount = 0;
+	int padding = 0;
+	for (int i = 0; i < length; i += 4) {
+		int block = fromBase64(base64String + i, padding);
+		toChar(decodedData, decodedCount, block, padding);
+	}
+
+	return decodedData;
+}
+
+int mainTest() {
+	const int len = 6;
+	uint8_t test[len] = {'h', 'e', 'l', 'l', 'o', '.'};
+
+	char *res = encodeBase64(test, sizeof(test));
+	uint8_t *final = decodeBase64(res, sizeof(res));
+	cout << final;
+
+	delete[] final;
 	delete[] res;
 	return 0;
 }
